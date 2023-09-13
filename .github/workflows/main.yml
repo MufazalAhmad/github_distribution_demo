@@ -23,3 +23,15 @@ jobs:
       - run: flutter test
         # Build apk.
       - run: flutter build apk
+
+      - name: Build Gradle
+        run: flutter build apk --debug
+      - run: ls build/app/outputs/flutter-apk
+             # - run: ls build/app/outputs/bundle/release
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{secrets.APP_ID}}
+          serviceCredentialsFileContent: ${{secrets.CREDENTIAL_FILE_CONTENT}}
+          groups: gladiator
+          file: build/app/outputs/flutter-apk/app-debug.apk
