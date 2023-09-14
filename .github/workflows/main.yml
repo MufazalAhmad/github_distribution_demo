@@ -33,12 +33,12 @@ jobs:
       - name: Run Flutter Tests
         run: flutter test
 
-      - name: Build APK
-        env:
-          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        run: base64 -d <<< $SIGNING_KEY_BASE64 > ./android/app/release-key.jks && flutter build apk --release --flavor=qa
+#      - name: Build APK
+#        env:
+#          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+#          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+#          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+#        run: base64 -d <<< $SIGNING_KEY_BASE64 > ./android/app/release-key.jks && flutter build apk --release --flavor=qa
 
       - name: Upload apk artifact
         uses: actions/upload-artifact@master
