@@ -1,9 +1,7 @@
-name: Flutter_Tests
+name: QA Release
 
 on:
   push:
-    branches: ["master"]
-  pull_request:
     branches: [master]
 
 jobs:
@@ -11,30 +9,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          flutter-version: '3.13.2'
-      - run: flutter --version
-      - run: flutter pub get
-      - run: flutter pub run build_runner build --delete-conflicting-outputs
-      - run: flutter analyze
-      - run: flutter test
-        # Build apk.
+          channel: "stable"
+          flutter-version: "3.13.3"
+
+      - name: Flutter Clean
+        run: flutter clean
+
+      - name: Get Flutter Dependencies
+        run: flutter pub get
+
+      - name: Build Runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze Flutter Code
+        run: flutter analyze
+
+      - name: Run Flutter Tests
+        run: flutter test
+
+      - name: Build Flutter Apk
       - run: flutter build apk --release
-
-      - name: Push to Releases
-        uses: ncipollo/release-action@v1
+      -
+      - name: Upload apk artifact
+        uses: actions/upload-artifact@master
         with:
-          artifacts: "build/app/outputs/flutter-apk/*,build/ios/iphoneos/app.ipa"
-          tag: v1.0.${{ github.run_number }}
-          token: ${{ secrets.TOKEN }}
-
-      - name: Upload artifact to Firebase App Distribution
+          name: apk-release
+          path: build/app/outputs/bundle/release/app-release.apk
+      - name: Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
+          appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: gladiator
-          file: build/app/outputs/flutter-apk/app-debug.apk
+          file: build/app/outputs/flutter-apk/app-qa-release.apk
+
+#            - name: Build APK
+#              env:
+#                SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+#                KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+#                KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+#              run: base64 -d <<< $SIGNING_KEY_BASE64 > ./android/app/release-key.jks && flutter build apk --release
